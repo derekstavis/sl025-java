@@ -1,0 +1,40 @@
+# ignore build dirs
+dist/*
+bin/*
+libs/*
+MANIFEST.MF
+
+# except .gitkeep
+!.gitkeep
+
+# OS
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# package
+*.apk
+*.jar
+
+# xcode
+*.swp
+*~.nib
+build/
+*.pbxuser
+*.perspective
+*.perspectivev3
+xcuserdata
+
+# eclipse
+.classpath
+.project
+.settings

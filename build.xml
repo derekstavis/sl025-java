@@ -1,0 +1,114 @@
+<project basedir="." default="package" name="sl025m-java" xmlns:ivy="antlib:org.apache.ivy.ant">
+    <property name="revision.file" value="src/io/github/derekstavis/Constants.java" />
+    <property name="mf.built_by" value="Derek Stavis" />
+    <property name="mf.created_by" value="Derek Stavis" />
+    <property name="mf.main_class" value="io.github.derekstavis.MainClass" />
+
+    <target description="Retrieve dependencies with ivy" name="resolve">
+        <ivy:retrieve conf="binaries" pattern="libs/[artifact](-[classifier]).[ext]"/>
+    </target>
+
+    <!-- Stores into git.present if the directory is a git repository -->
+    <available file=".git" property="git.present" type="dir"/>
+
+    <!-- Includes all jar files in libs directory into the classpath -->
+    <path id="build.classpath">
+        <fileset dir="libs">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Get git revision identifier into ${git.version} -->
+    <target description="Store git revision in ${git.revision}" if="git.present" name="git.revision">
+        <exec errorproperty="" executable="git" failifexecutionfails="false" outputproperty="git.revision.hash">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--always"/>
+            <arg value="HEAD"/>
+        </exec>
+        <echo>Getting revision identifier: ${git.revision.hash}</echo>
+    </target>
+
+    <!-- Replace placeholders with current revision number -->
+    <target depends="git.revision" description="Writes revision number into Constants.java" name="seal.revision">
+    	<echo>Writing revision identifier: ${git.revision.hash}</echo>
+        <replaceregexp 
+            file="${revision.file}" 
+            match="!repository_revision" 
+            replace="${git.revision.hash}"/>
+    </target>
+
+    <!-- As Constants.java was changed to include revision number, reset it to original version -->
+    <target description="Revert Constants.java" name="checkout.constants">
+        <echo>Reverting placeholders</echo>
+        <replaceregexp 
+            file="${revision.file}" 
+            match="${git.revision.hash}" 
+            replace="!repository_revision"/>
+    </target>
+    
+    <!-- Compiles everything into bin directory -->
+    <target depends="seal.revision" name="compile">
+        <echo>Compiling source files</echo>
+        <javac 
+            debug="true" 
+            includeantruntime="true" 
+            deprecation="on" 
+            destdir="bin" 
+            encoding="UTF-8" 
+            srcdir="${basedir}">
+            
+            <classpath refid="build.classpath"/>
+        </javac>
+    </target>
+
+    <!-- Next, my package task uses that classpath -->
+    <target depends="compile,checkout.constants" name="package">
+        <echo>Packaging JAR file with dependencies</echo>
+        <!-- convert build.classpath to mf.classpath (the string needed for the manifest task) -->
+        <pathconvert pathsep=" " property="mf.classpath">
+            <path refid="build.classpath"/>
+            <flattenmapper/>
+        </pathconvert>
+        <!-- now build the manifest file, using mf.classpath -->
+        <tstamp/>
+        <!-- needed for TODAY -->
+        <manifest file="MANIFEST.MF">
+            <attribute name="Built-By" value="${mf.built_by}"/>
+            <attribute name="Created-By" value="${mf.created_by}"/>
+            <attribute name="Main-Class" value="${mf.main_class}"/>
+            <attribute name="Implementation-Version" value="${git.revision.hash}"/>
+            <attribute name="Built-Date" value="${TODAY}"/>
+            <attribute name="Class-Path" value="${mf.classpath}"/>
+        </manifest>
+        <!-- create the jar file, including the manifest file we just created -->
+        <jar basedir="bin" 
+            destfile="dist/${ant.project.name}.jar" 
+            includes="**/*.*" 
+            manifest="MANIFEST.MF">
+        </jar>
+        <!-- copy all the jar files out to the destination directory (dest.dir) -->
+        <copy todir="dist">
+            <fileset dir="libs">
+                <include name="*.jar"/>
+                <include name="*.zip"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="clean">
+    	<ivy:cleancache />
+        <delete>
+            <fileset dir="dist">
+                <include name="*"/>
+            </fileset>
+            <fileset dir="bin">
+                <include name="*"/>
+            </fileset>
+        </delete>
+    </target>
+    
+    <target name="run">
+        <java fork="true" jar="dist/${ant.project.name}.jar"/>
+    </target>
+</project>
