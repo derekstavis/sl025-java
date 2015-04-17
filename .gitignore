@@ -1,7 +1,7 @@
-# ignore build dirs
-dist/*
-bin/*
-libs/*
+# Gradle and build stuff
+build/
+.gradle
+.idea
 MANIFEST.MF
 
 # except .gitkeep

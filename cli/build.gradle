@@ -1,0 +1,30 @@
+apply plugin:'application'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
+    }
+}
+
+apply plugin: 'eu.appsatori.fatjar'
+
+mainClassName = 'io.github.derekstavis.sl025.test.MainClass'
+
+fatJar {
+    manifest {
+        attributes 'Implementation-Title': 'sl025-java-cli',
+                   'Implementation-Version': version,
+                   'Main-Class': mainClassName
+    }
+}
+
+dependencies {
+    compile project(':library')
+    compile 'commons-lang:commons-lang:2.4'
+    compile 'commons-cli:commons-cli:1.2'
+    compile 'org.scream3r:jssc:2.8.0'
+}

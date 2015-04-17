@@ -5,13 +5,23 @@ SL025 family of MIFARE Reader/Writer modules.
 
 ## Building
 
-1. Run `ant package` to build the project
-2. You can clean `bin` and `dist` by using `ant clean`
+You need gradle 2.x to build the project.
+
+* Run `gradle build` to build the project
+* You can get the JAR library in `build/libs` directory
+
+To build a standalone command line utily that serves as a 
+online/offline test:
+ 
+* Run `gradle cli:fatJar`
+* You can find the cli JAR file at `cli/build/libs`
 
 ## Running
 
-When ran directly the Java archive provides a simple command-line tool
-to interact with MIFARE module. A shortcut to `java -jar` is `ant run`.
+You just want to run the offline test (a unit test wannabe for packet
+creation and checksum):
+
+* Run `gradle run`
 
 ## Contributing
 

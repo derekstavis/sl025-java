@@ -1,0 +1,6 @@
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'sl025-java',
+                   'Implementation-Version': version
+    }
+}

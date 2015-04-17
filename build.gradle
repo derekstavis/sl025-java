@@ -1,0 +1,26 @@
+def computeVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--always', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    version = computeVersionName()
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}
+
+repositories {
+    jcenter()
+}
